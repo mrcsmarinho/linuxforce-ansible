@@ -1,0 +1,48 @@
+--- 
+- 
+  become: true
+  hosts: intranet
+  tasks: 
+    - 
+      apt: 
+        pkg: 
+          - php7.0
+          - php-pear
+          - php7.0-curl
+          - php7.0-gd
+          - php7.0-intl
+          - php7.0-xmlrpc
+          - php7.0-mysql
+          - apache2
+          - python-mysqldb
+          - wget
+          - zip
+          - curl
+          - vim
+        state: present
+        update_cache: true
+      name: "Instala pacotes do web server"
+    - 
+      become: true
+      file: 
+        mode: "0775"
+        owner: "{{ app_user }}"
+        path: /srv/www
+        state: directory
+      name: "Diretorio do webserver"
+    - 
+      name: "Download e Extração do arquivo da aplição"
+      unarchive: 
+        dest: /srv/www
+        remote_src: true
+        src: "https://github.com/rogerramossilva/devops/raw/master/express.zip"
+        validate_certs: false
+    - 
+      name: "Substitui IP de Conexão com o Banco"
+      replace: 
+        path: /srv/www/express/backup.php
+        regexp: 192\.168\.1\.20
+        replace: "172.17.177.42"
+  vars_files: 
+    - vars/default.yml
+
