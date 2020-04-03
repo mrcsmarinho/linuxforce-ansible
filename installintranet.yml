@@ -63,6 +63,23 @@
     - name: 'Habilitar arquivo de configuração express'
       shell: /usr/sbin/a2enconf direxpress.conf
       notify: Reload Apache
+    - name: 'Habilitar modulo php7'
+      apache2_module:
+        state: present
+        name: php7.0
+      notify: Reload Apache
+    - name: 'Habilitar Modulo Virtual Host'
+      apache2_module:
+        state: present
+        name: vhost_alias
+      notify: Reload Apache
+    - name: 'Permissao Recursiva no Diretorio da Pagina'
+      file:
+        path: /srv/www/express
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
 
   handlers:
     - name: 'Reload Apache'
