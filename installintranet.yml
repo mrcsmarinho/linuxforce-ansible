@@ -2,6 +2,8 @@
 - 
   become: true
   hosts: intranet
+  vars_files:
+    - vars/default.yml
   tasks: 
     - 
       apt: 
@@ -43,6 +45,33 @@
         path: /srv/www/express/backup.php
         regexp: 192\.168\.1\.20
         replace: "172.17.177.42"
-  vars_files: 
-    - vars/default.yml
+    - name: 'Criando virtual host para a pagina express.asf.com'
+      template:
+        src: "files/express.conf"
+        dest: "/etc/apache2/sites-available/{{ http_conf }}"
+    - name: 'Controle de Diretorio Virtual Host'
+      template:
+        src: "files/direxpress.conf"
+        dest: "/etc/apache2/conf-available/direxpress.conf"
+    - name: 'Entrada DNS arquivo /etc/hosts'
+      template:
+        src: "files/hostsintranet.conf"
+        dest: "/etc/hosts"
+    - name: 'Habilitar site'
+      shell: /usr/sbin/a2ensite {{ http_conf }}
+      notify: Reload Apache
+    - name: 'Habilitar arquivo de configuração express'
+      shell: /usr/sbin/a2enconf direxpress.conf
+      notify: Reload Apache
+
+  handlers:
+    - name: 'Reload Apache'
+      service:
+        name: apache2
+        state: reloaded
+
+    - name: 'Restart Apache'
+      service:
+        name: apache2
+        state: restarted 
 
